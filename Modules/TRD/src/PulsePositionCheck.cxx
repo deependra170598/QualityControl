@@ -152,24 +152,13 @@ Quality PulsePositionCheck::check(std::map<std::string, std::shared_ptr<MonitorO
 
       auto* h = dynamic_cast<TH1F*>(mo->getObject());
 	    
-
-      //check max bin is in the spike on left.
-      // auto maxbin = h->GetMaximumBin();
-
-      // if (maxbin < mPulseHeightPeakRegion.first || maxbin > mPulseHeightPeakRegion.second) {
-      //   // is the peak in the peak region.
-      //   result = Quality::Bad;
-      //   result.addReason(FlagReasonFactory::Invalid(),
-      //                    "Amplification Peak is in the wrong position " + std::to_string(maxbin));
-      //   return result;
-      // }
-
       // Defining Fit function
 	    TF1* f1=new TF1("landaufit","((x<2) ? ROOT::Math::erf(x)*[0]:[0]) + [1]*TMath::Landau(x,[2],[3])",FunctionRange[0], FunctionRange[1]);
 	    f1->SetParameters(FitParam0, FitParam1, FitParam2, FitParam3);
 
-      LOGF(info,"FitRang[0]: %f, FitRange[1]: %f",FitRange[0],FitRange[1]);
-      LOGF(info,"FunctionRange[0]: %f, FunctionRange[1]: %f",FunctionRange[0],FunctionRange[1]);
+      // LOGF(info,"p0: %f, p1: %f, p2: %f, p3: %f",FitParam0, FitParam1, FitParam2, FitParam3);
+      // LOGF(info,"FitRang[0]: %f, FitRange[1]: %f",FitRange[0],FitRange[1]);
+      // LOGF(info,"FunctionRange[0]: %f, FunctionRange[1]: %f",FunctionRange[0],FunctionRange[1]);
 
       // Fitting Pulse Distribution with defined fit function
       h->Fit(f1,"","",FitRange[0], FitRange[1]);
@@ -181,7 +170,7 @@ Quality PulsePositionCheck::check(std::map<std::string, std::shared_ptr<MonitorO
       double_t chi2_value=f1->GetChisquare();
       Int_t NDF=f1->GetNDF();
       double_t Chi2byNDF = chi2_value/NDF;
-      
+
       LOGF(info,"chi2/ndf %f",Chi2byNDF);
 
       if(Chi2byNDF>chi2byNDF_threshold){
