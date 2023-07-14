@@ -8,6 +8,7 @@
 #include <TProfile2D.h>
 #include <TStopwatch.h>
 #include <THashList.h>
+#include <TLatex.h>
 
 #include "DataFormatsTRD/Constants.h"
 #include "DataFormatsTRD/Digit.h"
@@ -591,6 +592,8 @@ bool DigitsTask::isChamberToBeIgnored(unsigned int sm, unsigned int stack, unsig
   return mChambersToIgnoreBP.test(sm * o2::trd::constants::NLAYER * o2::trd::constants::NSTACK + stack * o2::trd::constants::NLAYER + layer);
 }
 
+uint DigitsTask::TotalEvent=0;
+
 void DigitsTask::monitorData(o2::framework::ProcessingContext& ctx)
 {
   for (auto&& input : ctx.inputs()) {
@@ -832,6 +835,9 @@ void DigitsTask::monitorData(o2::framework::ProcessingContext& ctx)
 
     } // end for d
   }   // for loop over digits
+  LOGF(info,"Now Writing Message inside mpnitor function");
+  TLatex* Message= new TLatex(1,20000,Form("Total events: %d",TotalEvent));
+  mPulseHeight->GetListOfFunctions()->Add(Message);
 } // loop over triggers
 
 void DigitsTask::endOfCycle()
@@ -844,6 +850,9 @@ void DigitsTask::endOfCycle()
   for (int i = 0; i < 30; ++i)
     mPulseHeightScaled->SetBinContent(i, mPulseHeight->GetBinContent(i));
   mPulseHeightScaled->Scale(1 / scale);
+  // LOGF(info,"Now Writing Message in End of cycle");
+  // TLatex* Message= new TLatex(1,20000,Form("Total event: %d",TotalEvent));
+  // mPulseHeight->GetListOfFunctions()->Add(Message);
 }
 
 void DigitsTask::endOfActivity(Activity& /*activity*/)
@@ -944,5 +953,6 @@ void DigitsTask::reset()
   if (_cLayer_1) {
     _cLayer_1->Clear();
   }
+  TotalEvent=0;
 }
 } // namespace o2::quality_control_modules::trd

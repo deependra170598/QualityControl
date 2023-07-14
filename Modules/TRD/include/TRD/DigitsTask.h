@@ -125,6 +125,8 @@ class DigitsTask final : public TaskInterface
   o2::trd::HalfChamberStatusQC* mChamberStatus = nullptr;
   std::string mChambersToIgnore;
   std::bitset<o2::trd::constants::MAXCHAMBER> mChambersToIgnoreBP;
+  ushort TriggerStatus;
+  static u_int TotalEvent;
 };
 
 } // namespace o2::quality_control_modules::trd

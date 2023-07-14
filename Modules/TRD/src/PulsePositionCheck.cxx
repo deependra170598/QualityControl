@@ -22,6 +22,7 @@
 #include <TH1.h>
 #include <TF1.h>
 #include <TMath.h>
+#include <TFitResult.h>
 
 #include <fairlogger/Logger.h> 
 #include <DataFormatsQualityControl/FlagReasons.h>
@@ -161,8 +162,16 @@ Quality PulsePositionCheck::check(std::map<std::string, std::shared_ptr<MonitorO
       // LOGF(info,"FunctionRange[0]: %f, FunctionRange[1]: %f",FunctionRange[0],FunctionRange[1]);
 
       // Fitting Pulse Distribution with defined fit function
-      h->Fit(f1,"","",FitRange[0], FitRange[1]);
+      auto FitResult= h->Fit(f1, "S", "", FitRange[0], FitRange[1]);
+      LOGF(info,"Status: %d, Cov Matrix Status: %d",FitResult->Status(),FitResult->CovMatrixStatus());
 
+      if(FitResult->CovMatrixStatus()!=3) // if covMatrix is not accurate
+      { 
+        result=Quality::Bad;
+        result.addReason(FlagReasonFactory::Unknown(),"Covariance matrix is not accurate.");
+        return result;
+      }
+      
       double_t peak_value_x = f1->GetMaximumX(mPulseHeightPeakRegion.first,mPulseHeightPeakRegion.second);
 
       LOGF(info,"peak_value_x %f",peak_value_x);
@@ -176,6 +185,7 @@ Quality PulsePositionCheck::check(std::map<std::string, std::shared_ptr<MonitorO
       if(Chi2byNDF>chi2byNDF_threshold){
         result=Quality::Bad;
         result.addReason(FlagReasonFactory::Unknown(),"chi2/ndf is very large");
+        return result;
       }
 
       auto x0 = h->GetXaxis()->GetBinLowEdge(0);
